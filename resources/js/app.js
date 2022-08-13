@@ -1,13 +1,22 @@
 import { createApp } from 'vue';
-import App from './App.vue';
 import vuetify from './plugins/vuetify';
+import router from './router';
+import axios from 'axios';
+import store from '@/store';
 import { loadFonts } from './plugins/webfontloader';
-import ExampleComponent from './components/ExampleComponent.vue';
 
 loadFonts()
 
-app.component('example-component', ExampleComponent);
+const app = createApp({})
 
-createApp(App)
-  .use(vuetify)
-  .mount('#app')
+app.use(vuetify);
+app.use(router);
+app.use(store);
+
+app.config.globalProperties.axios = axios;
+
+import App from './App.vue'
+app.component('App', App);
+
+
+app.mount('#app');

@@ -14,11 +14,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // \App\Models\User::factory(10)->create();
-
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        \App\Models\User::factory(10)->create();
+        \App\Models\AiBots::factory(1)->create();
+        \App\Models\Channel::factory(10)->create();
+        \App\Models\Chat::factory(10)->create();
+        //$this->call(AiBotChannelSeeder::class);
     }
 }

@@ -13,12 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('channels', function (Blueprint $table) {
+        Schema::create('ai_bots', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('short');
             $table->text('description');
-            $table->boolean('is_ai');
-            $table->foreignId('ai_bot_id')->nullable()->references('id')->on('ai_bots');
+            $table->string('logo_path');
             $table->timestamps();
         });
     }
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('channels');
+        Schema::dropIfExists('ai_bots');
     }
 };
