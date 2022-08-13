@@ -16,5 +16,10 @@ class UserService {
     getAdminBoard() {
         return axios.get(API_URL + 'admin', { headers: authHeader() });
     }
+    getUserName() {
+        let username = localStorage.getItem('user').name;
+
+        return username;
+    }
 }
 export default new UserService();

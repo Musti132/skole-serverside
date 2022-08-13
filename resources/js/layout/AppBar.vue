@@ -4,8 +4,13 @@
         <v-toolbar-title>SuperChat</v-toolbar-title>
 
         <v-spacer></v-spacer>
+        <div v-if="!isLoggedIn">
+            <LoginDialog align="end"></LoginDialog>
+        </div>
 
-        <LoginDialog align="end"></LoginDialog>
+        <div v-else>
+            <v-btn flat @click="logout">Logout</v-btn>
+        </div>
     </v-app-bar>
 </template>
 
@@ -15,5 +20,17 @@ export default {
     components: {
         LoginDialog
     },
+
+    computed: {
+        isLoggedIn() {
+            return this.$store.state.auth.status.loggedIn;
+        }
+    },
+
+    methods: {
+        logout() {
+            this.$store.dispatch("auth/logout");
+        }
+    }
 }
 </script>

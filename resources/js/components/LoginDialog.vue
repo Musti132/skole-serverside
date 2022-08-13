@@ -66,21 +66,20 @@ export default {
             ],
         };
     },
-
+    
+    computed: {
+        loggedIn() {
+            return this.$store.state.auth.status.loggedIn;
+        },
+    },
     methods: {
         login() {
-            this.axios
-                .post("/api/v1/auth/login", {
-                    email: this.email,
-                    password: this.password,
-                })
-                .then((resp) => {
-                    console.log(resp);
-                    //this.$router.push('/');
-                })
-                .catch(() => {
-                    console.log();
-                });
+            this.$store.dispatch("auth/login", {
+                email: this.email,
+                password: this.password,
+            }).then((resp) => {
+                console.log(resp);
+            });
         },
     },
 };

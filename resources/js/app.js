@@ -15,6 +15,8 @@ app.use(store);
 
 app.config.globalProperties.axios = axios;
 
+axios.defaults.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('token');
+
 import App from './App.vue'
 app.component('App', App);
 
