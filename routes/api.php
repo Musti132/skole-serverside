@@ -51,6 +51,8 @@ Route::group([
     ], function () {
         Route::controller(ChannelController::class)->group(function () {
             Route::get('channels', 'index');
+            Route::get('channel/{channel}', 'show');
+            Route::post('channel/{channel}/message', 'sendMessage');
         });
     });
 });

@@ -22,7 +22,7 @@ const routes = [
         name: 'Channels'
     },
     {
-        path: '/channel/:id',
+        path: '/channel/:roomId',
         component: ChannelRoom,
         name: 'ChannelRoom'
     },

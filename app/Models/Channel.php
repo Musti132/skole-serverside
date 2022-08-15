@@ -9,8 +9,15 @@ class Channel extends Model
 {
     use HasFactory;
 
-    public function chats(){
-        return $this->hasMany(Chat::class);
+    protected $fillable = [
+        'name',
+        'description',
+        'is_ai',
+        'bot_id',
+    ];
+
+    public function messages(){
+        return $this->hasMany(Chat::class)->orderBy('created_at', 'ASC');
     }
 
     public function users(){

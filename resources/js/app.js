@@ -4,6 +4,8 @@ import router from './router';
 import axios from 'axios';
 import store from '@/store';
 import { loadFonts } from './plugins/webfontloader';
+import App from './App.vue'
+import './bootstrap';
 
 loadFonts()
 
@@ -17,7 +19,6 @@ app.config.globalProperties.axios = axios;
 
 axios.defaults.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('token');
 
-import App from './App.vue'
 app.component('App', App);
 
 

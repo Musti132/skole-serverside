@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Http\Resources\Channel;
+namespace App\Http\Resources\Chat;
 
-use App\Http\Resources\Chat\MessageResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ChannelResource extends JsonResource
+class MessageResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -17,11 +16,9 @@ class ChannelResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
-            'description' => $this->description,
-            'is_ai' => $this->is_ai,
-            'ai' => $this->bot,
-            'messages' => MessageResource::collection($this->messages),
+            'message' => $this->message,
+            'user_id' => $this->user_id,
+            'user' => $this->user,
             'created_at' => $this->created_at->diffForHumans(),
         ];
     }

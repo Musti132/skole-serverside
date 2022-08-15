@@ -19,7 +19,11 @@ export default defineConfig({
                     base: null,
                     includeAbsolute: false,
                 },
+                compilerOptions: {
+                    isCustomElement: (tag) => ['v-list-item-content', 'v-list-item-avatar'].includes(tag),
+                }
             },
+
         }),
         vuetify({ autoImport: true }),
     ],

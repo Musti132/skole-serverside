@@ -28,7 +28,10 @@
                         <v-icon color="red">mdi-close</v-icon>
                     </td>
                     <td>{{ item.created_at }}</td>
-                    <td><v-btn color="secondary">Chat</v-btn></td>
+                    <td><v-btn :to="{
+                                name: 'ChannelRoom',
+                                params: { roomId: item.id },
+                            }" color="secondary">Chat</v-btn></td>
                 </tr>
             </tbody>
         </v-table>
