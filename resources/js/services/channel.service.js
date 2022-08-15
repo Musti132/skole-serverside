@@ -10,8 +10,18 @@ class ChannelService {
             });
     }
     sendMessage(id, message) {
-        return axios.post(API_URL + 'channel/' + id, {
+        return axios.post(API_URL + 'channel/' + id + "/message", {
             message: message,
+        }).then(response => {
+            return response.data;
+        });
+    }
+
+    sendMessageAi(id, message) {
+        return axios.post(API_URL + 'channel/' + id + "/ai/message", {
+            message: message,
+        }).then(response => {
+            return response.data;
         });
     }
 }

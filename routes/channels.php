@@ -17,6 +17,15 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
 
+
 Broadcast::channel('channel-{id}', function ($user) {
     return Auth::check();
+});
+
+
+Broadcast::channel('users-channel-{channelId}-{userId}', function ($user, $channelId, $userId) {
+    if ($user->id == $userId) {
+        return ['id' => $user->id, 'name' => $user->name];
+    }
+    
 });

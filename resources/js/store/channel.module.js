@@ -20,6 +20,13 @@ export const channel = {
                 }
             );
         },
+        sendMessage({ commit }, payload) {
+            return ChannelService.sendMessage(payload.id, payload.message).then(
+                channel => {
+                    return Promise.resolve(channel);
+                }
+            );
+        }
     },
     mutations: {
         getChannelSuccess(state, channel) {

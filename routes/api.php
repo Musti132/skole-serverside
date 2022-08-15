@@ -53,6 +53,7 @@ Route::group([
             Route::get('channels', 'index');
             Route::get('channel/{channel}', 'show');
             Route::post('channel/{channel}/message', 'sendMessage');
+            Route::post('channel/{channel}/ai/message', 'sendMessageAi');
         });
     });
 });

@@ -1,27 +1,17 @@
 <template>
     <v-container fluid>
-        <h1>Room name</h1>
-        <v-card
-            max-width="100%"
-            max-height="500"
-            outlined
-            scroll
-            class="scroll"
-        >
+        <h1>{{ channel.name }}</h1>
+        <v-row class="mb-4">
+            <v-col class="d-flex justify-end">
+                People here: {{ userCount }}
+            </v-col>
+        </v-row>
+        <v-card max-width="100%" max-height="500" outlined class="scroll" id="chatBox">
             <v-list-item three-line>
                 <v-list-item-content>
                     <div class="text-overline mb-4">Messages</div>
-                    <v-row
-                        no-gutters
-                        v-for="message in channel.messages"
-                        :key="message.id"
-                    >
-                        <v-col
-                            v-if="message.user_id !== user.id"
-                            cols="12"
-                            md="12"
-                            class="mb-2 d-flex justify-start"
-                        >
+                    <v-row no-gutters v-for="message in channel.messages" :key="message.id">
+                        <v-col v-if="message.user_id !== user.id" cols="12" md="12" class="mb-2 d-flex justify-start">
                             <v-card color="white" max-width="25%" class="pa-2">
                                 <v-card-title v-if="channel.ai">
                                     {{ channel.ai.name }}
@@ -39,12 +29,7 @@
                                 </v-card-subtitle>
                             </v-card>
                         </v-col>
-                        <v-col
-                            v-else
-                            cols="12"
-                            md="12"
-                            class="mb-2 d-flex justify-end"
-                        >
+                        <v-col v-else cols="12" md="12" class="mb-2 d-flex justify-end">
                             <v-card color="black" max-width="25%" class="pa-2">
                                 <v-card-title> {{ user.name }} </v-card-title>
                                 <v-card-text>
@@ -60,26 +45,17 @@
                     </v-row>
                 </v-list-item-content>
 
-                <v-list-item-avatar
-                    tile
-                    size="80"
-                    color="grey"
-                ></v-list-item-avatar>
+                <v-list-item-avatar tile size="80" color="grey"></v-list-item-avatar>
             </v-list-item>
         </v-card>
 
         <v-form class="mt-4">
             <v-row no-gutters>
                 <v-col cols="12" md="12">
-                    <v-textarea
-                        rows="2"
-                        name="message"
-                        label="Message"
-                        hint="Type your message here"
-                    ></v-textarea>
+                    <v-textarea ref="message" rows="2" name="message" label="Message" hint="Type your message here"></v-textarea>
                 </v-col>
 
-                <v-col cols="12" align="end">
+                <v-col cols="12" class="d-flex justify-end">
                     <v-btn @click="sendMessage">Send</v-btn>
                 </v-col>
             </v-row>
@@ -87,10 +63,12 @@
     </v-container>
 </template>
 
-<script type="module">
+<script>
 export default {
     data: () => ({
         channel: {},
+        userCount: 0,
+        message: null,
     }),
 
     computed: {
@@ -105,32 +83,55 @@ export default {
 
     created() {
         this.getChannel(this.roomId);
-    },
 
-    mounted() {
-        window.Echo.private("channel-" + this.roomId) //Should be Channel Name
-            .listen("test-event", (e) => {
-                if (this.content.id == e.id) {
-                    e.type == 1 ? this.count++ : this.count--;
-                }
+        window.Echo.private("channel-" + this.roomId)
+            .listen(".message.sent", (e) => {
+                this.channel.messages.push(e.message);
+                this.scrollChat();
+            })
+
+
+        window.Echo.join('users-channel-' + this.roomId + '-' + this.user.id)
+            .here((users) => {
+                this.userCount = users.length;
+            })
+            .joining((user) => {
+                this.userCount += 1;
+            })
+            .leaving((user) => {
+                this.userCount -= 1;
             });
     },
 
+    watch: {
+        'userCount': function (val) {
+            this.userCount = val;
+        },
+    },
+
     methods: {
+        scrollChat() {
+            let element = document.querySelector("#chatBox");
+            var scrollHeight = element.scrollHeight;
+            element.scrollTop = scrollHeight;
+        },
+
         getChannel(roomId) {
             this.$store.dispatch("channel/getChannelRoom", roomId).then(() => {
                 this.channel = this.$store.getters["channel/getChannel"];
             });
-
-            //console.log(this.$store.state.channel);
         },
 
-        sendMessage(message) {
+        sendMessage() {
+            var message = this.$refs.message.value;
+
             this.$store
-                .dispatch("channel/sendMessage", message)
+                .dispatch("channel/sendMessage", {
+                    'id': this.roomId,
+                    'message': message,
+                })
                 .then((resp) => {
-                    console.log("test");
-                    console.log(this.$store.getters["channel/getChannel"]);
+                    this.channel.messages.push(resp.data);
                 });
         },
     },
@@ -144,6 +145,8 @@ export default {
 }
 
 .scroll {
-    overflow-y: scroll;
+    display: flex !important;
+    flex-direction: column;
+    overflow-y: scroll !important;
 }
 </style>

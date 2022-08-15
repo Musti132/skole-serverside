@@ -29,7 +29,6 @@ Pusher.log = function (msg) {
     console.log(msg);
 };
 
-console.log(import.meta.env.VITE_PUSHER_HOST);
 
 window.Echo = new Echo({
     broadcaster: 'pusher',
