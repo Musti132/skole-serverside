@@ -9,8 +9,8 @@ class AiBots extends Model
 {
     use HasFactory;
 
-    public function chats(){
-        return $this->hasMany(Chats::class);
+    public function messages() {
+        return $this->hasMany(AiChat::class, 'bot_id', 'id');
     }
 
     public function channel(){

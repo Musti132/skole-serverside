@@ -52,6 +52,7 @@ Route::group([
         Route::controller(ChannelController::class)->group(function () {
             Route::get('channels', 'index');
             Route::get('channel/{channel}', 'show');
+            Route::get('channel/ai/{channel}', 'showAi');
             Route::post('channel/{channel}/message', 'sendMessage');
             Route::post('channel/{channel}/ai/message', 'sendMessageAi');
         });

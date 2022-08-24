@@ -23,9 +23,11 @@ Broadcast::channel('channel-{id}', function ($user) {
 });
 
 
-Broadcast::channel('users-channel-{channelId}-{userId}', function ($user, $channelId, $userId) {
-    if ($user->id == $userId) {
-        return ['id' => $user->id, 'name' => $user->name];
+Broadcast::channel('users-channel-{channelId}', function ($user, $channelId) {
+    if(!Auth::check()) {
+        return response()->json([
+            'message' => 'You are not authorized to listen to this channel.',
+        ], 403);
     }
-    
+    return ['id' => $user->id, 'name' => $user->name];
 });

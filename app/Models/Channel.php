@@ -27,4 +27,8 @@ class Channel extends Model
     public function bot(){
         return $this->hasOne(AiBots::class, 'id', 'ai_bot_id');
     }
+
+    public function botMessages() {
+        return $this->hasManyThrough(AiChat::class, AiBots::class, 'id', 'bot_id');
+    }
 }

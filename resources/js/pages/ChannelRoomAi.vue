@@ -1,15 +1,11 @@
 <template>
     <v-container fluid>
-        <h1>{{ channel.name }}</h1>
-        <v-row class="mb-4">
-            <v-col class="d-flex justify-end">
-                People here: {{ userCount }}
-            </v-col>
-        </v-row>
+        <h1>{{ channel.ai.name }}</h1>
         <v-card
             max-width="100%"
             max-height="500"
             outlined
+            :loading="is_loading"
             class="scroll"
             id="chatBox"
         >
@@ -28,20 +24,14 @@
                             class="mb-2 d-flex justify-start"
                         >
                             <v-card color="white" max-width="25%" class="pa-2">
-                                <v-card-title v-if="channel.ai">
+                                <v-card-title>
                                     {{ channel.ai.name }}
-                                </v-card-title>
-                                <v-card-title v-else>
-                                    {{ message.user.name }}
                                 </v-card-title>
                                 <v-card-text>
                                     <p>
                                         {{ message.message }}
                                     </p>
                                 </v-card-text>
-                                <v-card-subtitle>
-                                    {{ message.created_at }}
-                                </v-card-subtitle>
                             </v-card>
                         </v-col>
                         <v-col
@@ -77,6 +67,7 @@
             <v-row no-gutters>
                 <v-col cols="12" md="12">
                     <v-textarea
+                        v-model="message"
                         ref="message"
                         rows="2"
                         name="message"
@@ -96,10 +87,9 @@
 export default {
     data: () => ({
         channel: {},
-        userCount: 0,
+        messageCount: 0,
         message: null,
         is_loading: false,
-        interval: null,
     }),
 
     computed: {
@@ -114,57 +104,45 @@ export default {
 
     created() {
         this.getChannel(this.roomId);
-
-        window.Echo.private("channel-" + this.roomId).listen(
-            ".message.sent",
-            (e) => {
-                this.channel.messages.push(e.message);
-                this.scrollChat();
-            }
-        );
-
-        window.Echo.join("users-channel-" + this.roomId)
-            .here((users) => {
-                console.log(users);
-                this.userCount = users.length;
-            })
-            .joining((user) => {
-                this.userCount += 1;
-            })
-            .leaving((user) => {
-                this.userCount -= 1;
-            });
-    },
-
-    mounted() {
     },
 
     methods: {
         scrollChat() {
             let element = document.querySelector("#chatBox");
             var scrollHeight = element.scrollHeight;
-            element.scrollTop = scrollHeight * 2;
+            element.scrollTop = scrollHeight;
         },
 
         getChannel(roomId) {
-            this.$store.dispatch("channel/getChannelRoom", roomId).then(() => {
-                this.channel = this.$store.getters["channel/getChannel"];
-            });
+            this.$store
+                .dispatch("channel/getChannelRoomAi", roomId)
+                .then(() => {
+                    this.channel = this.$store.getters["channel/getChannel"];
+                });
         },
 
         async sendMessage() {
-            this.is_loading = true;
             var message = this.$refs.message.value;
 
+            this.is_loading = true;
+
+            var userMessage = {
+                id: this.messageCount,
+                message: message,
+                user_id: this.user.id,
+            };
+
+            this.channel.messages.push(userMessage);
+
             await this.$store
-                .dispatch("channel/sendMessage", {
+                .dispatch("channel/sendMessageAi", {
                     id: this.roomId,
                     message: message,
                 })
                 .then((resp) => {
-                    this.channel.messages.push(resp.data);
-                    this.scrollChat();
                     this.is_loading = false;
+                    this.message = null;
+                    this.channel.messages.push(resp.data.ai_response);
                 });
         },
     },

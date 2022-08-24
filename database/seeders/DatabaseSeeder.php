@@ -17,7 +17,8 @@ class DatabaseSeeder extends Seeder
         \App\Models\User::factory(10)->create();
         \App\Models\AiBots::factory(1)->create();
         \App\Models\Channel::factory(10)->create();
-        \App\Models\Chat::factory(500)->create();
+        \App\Models\Chat::factory(100)->create();
+        \App\Models\AiChat::factory(100)->create();
         //$this->call(AiBotChannelSeeder::class);
     }
 }

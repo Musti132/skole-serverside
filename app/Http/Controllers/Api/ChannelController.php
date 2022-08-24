@@ -6,15 +6,20 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Channel\ChannelResource;
 use App\Models\Channel;
 use App\Events\MessageSent;
+use App\Http\Requests\Channel\MessageAiRequest;
+use App\Http\Requests\Channel\MessageRequest;
+use App\Http\Resources\Channel\ChannelAiResource;
+use App\Http\Resources\Chat\MessageAiResource;
 use App\Http\Resources\Chat\MessageResource;
+use App\Services\OpenAIService;
 use Illuminate\Http\Request;
 use Orhanerday\OpenAi\OpenAi;
 
 class ChannelController extends Controller
 {
-    public function getRouteKeyName()
+    public function __construct(OpenAIService $openAi)
     {
-        return 'id';
+        $this->openAi = $openAi;
     }
 
     public function index()
@@ -31,9 +36,39 @@ class ChannelController extends Controller
         return new ChannelResource($channel);
     }
 
-    public function sendMessage(Channel $channel)
+    public function showAi(Channel $channel)
+    {
+        if (!$channel->is_ai) {
+            return response()->json([
+                'message' => 'This channel is not an AI channel.'
+            ], 400);
+        }
+
+        $channel->load('bot');
+
+        return new ChannelAiResource($channel);
+    }
+
+    /**
+     * Send a message to an channel
+     * 
+     * @param MessageRequest $request
+     * @param Channel $channel
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function sendMessage(MessageRequest $request, Channel $channel)
     {
         $channel->load(['messages.user', 'bot']);
+
+        $this->openAi->moderate(request('message'));
+
+        if($this->openAi->isFlagged()) {
+            return response()->json([
+                'status' => 'flagged',
+                'message' => 'Your message has been flagged as inappropriate'
+            ]);
+        }
 
         $message = $channel->messages()->create([
             'user_id' => auth()->id(),
@@ -48,32 +83,52 @@ class ChannelController extends Controller
         ]);
     }
 
-    public function sendMessageAi(Channel $channel)
+    /**
+     * Send a message to an AI channel
+     * 
+     * @param MessageAiRequest $request
+     * @param Channel $channel
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function sendMessageAi(MessageAiRequest $request, Channel $channel)
     {
-        if (!$channel->bot) {
+
+        /**
+         * Tjek om kanalen er en AI kanal
+         * Hvis ikke, returner en fejl
+         */
+        
+        if (!$channel->is_ai) {
             return response()->json([
-                'message' => 'Bot not found',
-            ], 404);
+                'message' => 'This channel is not an AI channel.'
+            ], 400);
         }
 
-        $channel->load(['messages.user', 'bot']);
-        $open_ai = new OpenAi(env('OPEN_AI_API_KEY'));
+        $this->openAi->moderate(request('message'));
 
-        $complete = $open_ai->complete([
-            'engine' => 'text-davinci-002',
-            'prompt' => request('message'),
-            'temperature' => 0.7,
-            'max_tokens' => 256,
-            'frequency_penalty' => 0,
-            'presence_penalty' => 0,
+        if($this->openAi->isFlagged()) {
+            return response()->json([
+                'status' => 'flagged',
+                'message' => 'Your message has been flagged as inappropriate'
+            ]);
+        }
+
+        $aiResponse = $this->openAi->complete(request('message'));
+
+        $message = $channel->botMessages()->create([
+            'user_id' => auth()->id(),
+            'message' => request('message'),
+            'channel_id' => $channel->id,
         ]);
 
-
-        return json_decode($complete, true);
-
-        $message = $channel->messages()->create([
-            'user_id' => null,
-            'message' => request('message'),
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Message sent successfully',
+            'data' => [
+                'ai_response' => ['message' => $aiResponse],
+                'message' => new MessageAiResource($message),
+            ],
         ]);
     }
 }

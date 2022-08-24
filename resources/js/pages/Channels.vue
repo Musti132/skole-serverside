@@ -28,10 +28,15 @@
                         <v-icon color="red">mdi-close</v-icon>
                     </td>
                     <td>{{ item.created_at }}</td>
-                    <td><v-btn :to="{
+                    <td><v-btn v-if="!item.is_ai" :to="{
                                 name: 'ChannelRoom',
                                 params: { roomId: item.id },
-                            }" color="secondary">Chat</v-btn></td>
+                            }" color="secondary">Chat</v-btn>
+                            <v-btn v-else :to="{
+                                name: 'ChannelRoomAi',
+                                params: { roomId: item.id },
+                            }" color="secondary">Chat</v-btn>
+                            </td>
                 </tr>
             </tbody>
         </v-table>
